@@ -1,0 +1,534 @@
+package gui;
+
+import gui.Toolbar.ToolBar;
+import gui.Tree.CellEditor;
+import gui.Tree.MySelectListener;
+import gui.menu.MenuBar;
+import instaframController.CompanyController;
+import instaframController.ConfigurationControler;
+import instaframController.ParametarController;
+import instaframModel.CompanyModel;
+import instaframModel.ParametarModel;
+import instaframModel.ProductModel;
+import instaframView.CompanyView;
+import instaframView.ParametarView;
+import instaframView.ProductView;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import workSpace.SaveWorkSpace;
+
+public class MainWindow extends JFrame {
+
+	private static final long serialVersionUID = 1366462111697644313L;
+	public static final String APP_TITLE = "InstaFram";
+	private static MainWindow instance = null;
+	private JTree tree;
+	private DefaultTreeModel treeModel;
+	private ResourceBundle res;
+	private MenuBar menu;
+	private JLabel statusBar;
+	private ConfigurationControler con;
+	private CompanyController concon;
+	private ParametarController parcon;
+	private Configurator conf;
+	private static JPanel leftPanel;
+	private DefaultMutableTreeNode workspaceNode;
+	private String ucitanTekst;
+	private int broj;
+	
+	private JScrollPane scroll;
+	
+	
+	private static JPanel rightPanel;
+
+	private MainWindow() {
+
+		Locale.setDefault(new Locale("en","US"));
+
+		res = ResourceBundle.getBundle("messageRes.MesRes", Locale.getDefault());
+	
+		
+
+		
+	}
+	
+	
+	@SuppressWarnings("deprecation")
+	public void initGUI() {
+	
+		setTitle(APP_TITLE);
+		setSize(1000, 700);
+		ImageIcon image = new ImageIcon("images/Logo.png");
+		this.setIconImage(image.getImage());
+		
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+	    menu = new MenuBar();
+		menu.setPreferredSize(new Dimension(500, 20));
+		setJMenuBar(menu);
+
+		ToolBar tb = new ToolBar();
+		tb.setPreferredSize(new Dimension(500, 35));
+		add(tb, BorderLayout.NORTH);
+
+		JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		statusBar = new JLabel("Time " + new Date().toLocaleString());
+		pnlStatus.setBackground(Color.WHITE);
+		pnlStatus.setPreferredSize(new Dimension(100, 40));
+		pnlStatus.setBorder(new MatteBorder(1, 1, 1, 1, Color.GRAY));
+
+		JLabel status = new JLabel("Status bar :");
+		status.setPreferredSize(new Dimension(100, 27));
+		pnlStatus.add(status);
+		pnlStatus.add(statusBar);
+		add(pnlStatus, BorderLayout.SOUTH);
+
+		JPanel panel = new JPanel();
+		panel.setBorder(new EmptyBorder(450, 650, 20, 20));
+		panel.setBorder(BorderFactory.createEtchedBorder());
+		panel.setLayout(new BorderLayout());
+
+		leftPanel = new JPanel();
+		leftPanel.setBackground(Color.WHITE);
+		leftPanel.setPreferredSize(new Dimension(300, 500));
+
+		rightPanel = new JPanel();
+		rightPanel.setBackground(Color.WHITE);
+  
+		initTree();
+	
+		scroll = new JScrollPane(tree,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+		scroll.setPreferredSize(new Dimension(300, 500));
+		scroll.setBackground(Color.WHITE);
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scroll, rightPanel);
+		panel.add(splitPane);
+		
+		add(panel, BorderLayout.CENTER);
+		
+		addWindowListener(new WindowAdapter()
+		{
+		
+		@Override
+		public void windowClosing(WindowEvent e) {
+			
+			JFrame frame = (JFrame) e.getComponent();
+			int code = JOptionPane.showConfirmDialog(frame, "Do you want to close?", "Exit", JOptionPane.YES_NO_OPTION);
+			if (code!=JOptionPane.YES_OPTION)
+				frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+			else {
+				try {
+					SaveWorkSpace s = new SaveWorkSpace();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			
+	   
+			}
+			
+		}
+		
+		});
+		
+	
+	}
+	
+	
+	public void read() throws IOException, ClassNotFoundException {
+		
+		FileInputStream f = new FileInputStream("workspace.txt");
+		ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(f));
+		try {
+
+          ucitanTekst = (String)ois.readObject();
+           broj = ois.read();
+			System.out.println(ucitanTekst);
+			System.out.println(broj);
+		} finally {
+			ois.close();
+		}
+		
+		
+	}
+	
+	
+	
+	
+	
+	public void write() throws IOException {
+		File f = new File("setup.txt");
+		
+		String wel = MainWindow.getInstance().getContr().getConfModel().getWelcome();
+		String lic = MainWindow.getInstance().getContr().getConfModel().getLicence();
+		String ver = MainWindow.getInstance().getContr().getConfModel().getVerzija();
+		String name = MainWindow.getInstance().getC().getNameR();
+		String izvor =  MainWindow.getInstance().getContr().getConfModel().getIzvor();
+		String[] ConfPolja = new String[] {wel,lic,ver,name,izvor};
+		
+		ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
+		try {
+			oos.writeObject(ConfPolja);
+		} finally {
+			oos.close();
+		}
+			
+	}
+	
+	
+
+	public void showEditCompanyView(CompanyModel comp) {
+		CompanyView kv = new CompanyView();		
+		kv.setKompanija(comp);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,50));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+
+
+	
+	public void showEditProductView(ProductModel pro) {
+		ProductView kv = new ProductView();		
+		kv.setProizvod(pro);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,25));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showEditParametarView(ParametarModel par) {
+		ParametarView pr = new ParametarView();		
+		pr.setParametar(par);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,50));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(pr);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showCompanyView(CompanyModel comp) {
+		CompanyView kv = new CompanyView();
+		kv.setKompanija(comp);
+		rightPanel.removeAll();
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showProductView(ProductModel pro) {
+		ProductView pv = new ProductView();
+		pv.setProizvod(pro);
+		rightPanel.removeAll();
+		rightPanel.add(pv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void hideCompanyView(CompanyModel comp) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+	public void hideProductView(ProductModel prod) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+	public void hideParametarView(ParametarModel param) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+
+	public void showParametarView(ParametarModel par) {
+		ParametarView pv = new ParametarView();
+		pv.setParametar(par);
+		rightPanel.removeAll();
+		rightPanel.add(pv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+ public void changeLanguage(){
+		
+		res =
+            ResourceBundle.getBundle( "messageRes.MesRes", Locale.getDefault() );
+	    setTitle(res.getString("Title"));
+		menu.initComponents();
+		
+	}
+	
+	public void initTree() {
+		
+		
+		
+		workspaceNode = new DefaultMutableTreeNode("WorkSpace");
+		
+		treeModel  = new DefaultTreeModel(workspaceNode);
+		
+		treeModel.setAsksAllowsChildren(true);
+		tree = new JTree(treeModel) {
+
+			private static final long serialVersionUID = 2789999619139248302L;
+
+			@Override
+			public boolean isPathEditable(TreePath path) {
+
+				if (path != null) {
+					DefaultMutableTreeNode tn = (DefaultMutableTreeNode) path
+							.getLastPathComponent();
+					if (!tn.isRoot()) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+				return false;
+			}
+
+		};
+		tree.setEditable(true);
+		tree.setBackground(Color.white);
+		tree.setCellEditor(new CellEditor(tree, null));
+		tree.addTreeSelectionListener(new MySelectListener());
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		KeyStroke ks = KeyStroke.getKeyStroke("F2");
+		InputMap im = tree
+				.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		im.put(ks, "edit_tree_cell");
+		ActionMap am = tree.getActionMap();
+		am.put("edit_tree_cell", new AbstractAction() {
+
+			private static final long serialVersionUID = 1309752715414833276L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				tree.startEditingAtPath(tree.getSelectionPath());
+			}
+		});
+		
+	 
+		
+	}
+	
+	
+	
+
+	
+	public ResourceBundle getResourceBundle() {
+		return res;
+	}
+	
+	public static MainWindow getInstance() {
+		if (instance==null) {
+		     instance = new MainWindow();
+		     instance.initGUI();
+		}
+		
+		return instance;
+	}
+
+	public JTree getTree() {
+		return tree;
+	}
+
+	public DefaultTreeModel getModel() {
+		return treeModel;
+	}
+	
+	public void setControler(ConfigurationControler con) {
+		this.con = con;
+	}
+	
+	public ConfigurationControler getContr() {
+		return con;
+	}
+	
+	public ParametarController getControler() {
+		return parcon;
+	}
+	
+	
+	public Configurator getC() {
+		return conf;
+	}
+	
+	public CompanyController getCompCon() {
+		return concon;
+	}
+	
+	public void setCompCon(CompanyController concon) {
+		this.concon = concon; 
+	}
+	
+	public void setC(Configurator conf) {
+		this.conf = conf;
+		
+	}
+
+
+	public DefaultMutableTreeNode getWorkspaceNode() {
+		// TODO Auto-generated method stub
+		return workspaceNode;
+	}
+
+
+	public void showLoadedPanel(JTree treeN) throws ClassNotFoundException, IOException {
+		
+  /*	
+	JPanel pan = new JPanel();
+	pan.setSize(300,200);
+	leftPanel.remove(tree);
+	leftPanel.remove(scroll);
+	pan.add(treeN);
+	leftPanel.add(pan);
+	leftPanel.validate();
+	leftPanel.repaint();
+	*/
+	
+	
+	//Nisam znala kako da dodam na levi panel, ovaj gore kod je neka ideja ali ne radi, pa sam to uradila u novom frejmu cisto da se vidi da sam
+	//uspela da sacuvam i ucitam stablo
+		
+   JFrame f = new JFrame();
+    f.setSize(300, 250);
+    f.setBackground(Color.white);
+    JLabel lbl = new JLabel();
+    lbl.setSize(100, 100);
+    lbl.setText("Nisam znala da dodam na levi panel, pa sam ovako uradila da se vidi da imam cuvanje i citanje workspacea");
+   
+    f.setLocationRelativeTo(null);
+    JPanel pan = new JPanel();
+    pan.setBackground(Color.white);
+    pan.setSize(f.getSize());
+    pan.add(treeN);
+    pan.add(lbl);
+    f.add(pan);
+    f.setVisible(true);
+
+		
+	
+	}
+
+
+	public void createPropertie() throws FileNotFoundException, IOException {
+		/// Ideja za preperties.ini
+			File f = new File("dat.ini");
+		
+			int broj = MainWindow.getInstance().getC().getNum();
+			Properties p = new Properties();
+			ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
+			JTree model = MainWindow.getInstance().getC().getTreeCh();
+		    int br = model.getModel().getChildCount(model.getModel().getRoot());
+			
+			p.setProperty("Ime", "vrednost");
+			
+	       /* do {
+	        	
+	        	p.setProperty(model.getModel().getRoot().toString(), "true");
+	        	br--;
+	        }while(br > 0);
+	       */ 
+	        try {
+				os.writeObject(p);
+			} finally {
+				os.close();
+			}
+	}
+
+
+}

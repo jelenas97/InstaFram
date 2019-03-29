@@ -1,0 +1,58 @@
+package actionListener;
+
+import gui.MainWindow;
+import instaframModel.ProductModel;
+
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+
+public class NodeListener extends DefaultMutableTreeNode implements MouseListener{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -684122996862102110L;
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+		DefaultMutableTreeNode sel = (DefaultMutableTreeNode) MainWindow
+				.getInstance().getTree().getLastSelectedPathComponent();
+		
+	if (e.getClickCount() == 2 && sel.getUserObject() instanceof ProductModel ) {
+		
+		MainWindow.getInstance().showConfigurator();
+		
+	  }
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

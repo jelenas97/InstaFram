@@ -1,0 +1,80 @@
+package instaframModel;
+
+public class CompanyModel {
+	
+	private String name;
+	private String headoffice;
+	private String number;
+	
+	
+	 public CompanyModel() {
+		 setNaziv("Type company name..");
+		 setSediste("Type comany head office..");
+		 setNaziv(getNaziv());
+		 setBroj("Type company telephone number...");
+		 
+	 }
+	
+     public CompanyModel(String name,String headoffice) {
+		 setNaziv("Type company name..");
+		 setSediste("Type comany head office..");
+		 setBroj("Type company telephone number...");
+	}
+	
+	 public CompanyModel(String name) {
+		 setNaziv(name);
+		 setSediste("Type company head office..");
+		 setBroj("Type company telephone number...");
+	     	 
+		 
+	}
+
+	public String getNaziv() {
+		return name;
+	}
+
+	public void setNaziv(String name) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
+		name = name.trim();
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Name is empty!");
+		}
+		this.name = name;
+	}
+
+	public String getSediste() {
+		return headoffice;
+	}
+
+	public void setSediste(String headoffice) {
+		if (headoffice == null) {
+			throw new NullPointerException();
+		}
+		headoffice = headoffice.trim();
+		if (headoffice.isEmpty()) {
+			throw new IllegalArgumentException("Head office is empty!");
+		}
+		this.headoffice = headoffice;
+	}
+	
+	public void setBroj(String number) {
+		this.number = number;
+		
+	}
+
+	public String getBroj() {
+		return number;
+		
+	}
+	
+	@Override
+	public String toString() {
+		return this.name ;
+	}
+
+	
+	
+
+}

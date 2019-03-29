@@ -1,0 +1,210 @@
+package instaframView;
+
+
+import gui.MainWindow;
+import gui.Tree.AddProduct;
+import gui.Tree.RemoveCompany;
+import instaframController.ProductController;
+import instaframModel.ProductModel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import actionListener.CancelBtnListener;
+import actionListener.RemoveBtnListener;
+
+
+public class ProductView extends JPanel{
+	private static final long serialVersionUID = 1884063759494311563L;
+
+	private ProductModel product;
+	private ProductController proController;
+
+	private JPanel pnlContent;
+	private JLabel lblName;
+	private JTextField tfName;
+	private JLabel lblVersion;
+	private JTextField tfVersion;
+	private JLabel lblPhoto;
+	private JButton btnUploadPhoto;
+	private JButton btnDeletePhoto;
+
+	private JPanel pnlKonacno;
+	private JButton btnSave;
+	private JButton btnCancel;
+	private JButton btnRemove;
+	
+	public ProductView(ProductModel product ) {
+		initGUI();
+		constructGUI();
+		setProizvod(product);
+	}
+	
+	public ProductView() {
+		initGUI();
+		constructGUI();
+		
+	}
+
+
+	private void initGUI() {
+		setLayout(new BorderLayout());
+	
+		pnlContent = new JPanel(new GridBagLayout());
+		pnlContent.setBackground(Color.WHITE);
+		pnlContent.setForeground(Color.WHITE);
+		
+		lblName= new JLabel(MainWindow.getInstance().getResourceBundle().getString("lblName"));
+		tfName = new JTextField(40);
+		tfName.setPreferredSize(new Dimension(pnlContent.getSize().width,27));
+
+		lblVersion = new JLabel(MainWindow.getInstance().getResourceBundle().getString("lblVersion"));
+		tfVersion = new JTextField(20);
+		tfVersion.setPreferredSize(new Dimension(pnlContent.getSize().width,27));
+		
+		lblPhoto = new JLabel();
+		lblPhoto.setPreferredSize(new Dimension(200,200));
+		lblPhoto.setBorder(BorderFactory.createLoweredBevelBorder());
+
+		btnUploadPhoto = new JButton(MainWindow.getInstance().getResourceBundle().getString("btnUploadPhoto"));
+		btnUploadPhoto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				uploadPhoto();
+			}
+		});
+
+		btnDeletePhoto = new JButton(MainWindow.getInstance().getResourceBundle().getString("btnDeletePhoto"));
+		btnDeletePhoto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deletePhoto();
+			}
+		});
+
+		pnlKonacno = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+		pnlKonacno.setBackground(Color.WHITE);
+		pnlKonacno.setForeground(Color.WHITE);
+		
+		btnSave = new JButton(new AddProduct(MainWindow.getInstance().getResourceBundle().getString("btnSave")));
+		btnCancel = new JButton(MainWindow.getInstance().getResourceBundle().getString("btnCancel"));
+		btnRemove = new JButton(new RemoveCompany(MainWindow.getInstance().getResourceBundle().getString("btnRemove"))); //PRVI NACIN
+		btnRemove.addMouseListener(new RemoveBtnListener()); // DRUGI NACIN
+		btnCancel.addMouseListener(new CancelBtnListener());
+		btnSave.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dodaj();
+			}
+		});
+	}
+
+	private void constructGUI() {
+	   pnlContent.add(lblName, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		pnlContent.add(tfName, new GridBagConstraints(1, 0, 1, 1, 100, 0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		pnlContent.add(lblVersion, new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		pnlContent.add(tfVersion, new GridBagConstraints(1, 1, 1, 1, 100, 0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+
+		JPanel photoP = new JPanel();
+		JPanel panC = new JPanel();
+		JPanel panE = new JPanel();
+		photoP.add(lblPhoto);
+		photoP.add(btnUploadPhoto);
+		photoP.add(btnDeletePhoto);
+		photoP.setPreferredSize(new Dimension(200,400));
+		photoP.setBackground(Color.white);
+		panC.setBackground(Color.white);
+		panC.setPreferredSize(new Dimension(100,100));
+		panE.setBackground(Color.white);
+		panE.setPreferredSize(new Dimension(100,100));
+		
+		pnlKonacno.add(btnSave);
+		pnlKonacno.add(btnCancel);
+		pnlKonacno.add(btnRemove);
+		
+		add(pnlContent,BorderLayout.NORTH);
+		add(pnlKonacno, BorderLayout.SOUTH);
+		add(photoP,BorderLayout.WEST);
+		add(panC,BorderLayout.CENTER);
+		add(panE,BorderLayout.EAST);
+	}
+
+	public ProductModel getProizvod() {
+		return product;
+	}
+
+	public void setProizvod(ProductModel proizvod) {
+		this.product = proizvod;
+		proController = null;
+		refreshView();
+	}
+
+	public void refreshView() {
+		tfName.setText(product.getNazivP());
+		tfVersion.setText(product.getVerzija());
+		Icon icon = null;
+		if (product.getPhoto() != null) {
+			icon = new ImageIcon(product.getPhoto());
+		}
+		lblPhoto.setIcon(icon);
+	}
+
+	private void uploadPhoto() {
+		JFileChooser fc = new JFileChooser();
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			ImageIcon icon = new ImageIcon(fc.getSelectedFile().getAbsolutePath());
+			lblPhoto.setIcon(icon);
+		}
+	}
+
+	private void deletePhoto() {
+		lblPhoto.setIcon(null);
+	}
+
+	private void dodaj() {
+		if (proController == null) {
+			proController = new ProductController(product, this);
+		}
+		String name = tfName.getText();
+		String ver = tfVersion.getText();
+		Image photo = null;
+		if (lblPhoto.getIcon() != null) {
+			photo = ((ImageIcon) lblPhoto.getIcon()).getImage();
+		}
+
+		String message = proController.updateProizvod(name, ver, photo);
+
+		Window parent = SwingUtilities.getWindowAncestor(this);
+		JOptionPane.showMessageDialog(parent, message);
+		
+	}
+
+
+}

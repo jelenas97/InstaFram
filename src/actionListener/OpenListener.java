@@ -1,0 +1,41 @@
+package actionListener;
+
+import gui.MainWindow;
+
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+
+import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+
+import workSpace.OpenWorkSpace;
+
+public class OpenListener extends AbstractAction {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -932646150363864811L;
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		try {
+			
+			OpenWorkSpace op  = new OpenWorkSpace();
+			op.InitTree();
+			MainWindow.getInstance().showLoadedPanel(op.getTreeW());
+			
+		    
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+}

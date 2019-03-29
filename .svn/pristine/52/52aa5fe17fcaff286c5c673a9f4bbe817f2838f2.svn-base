@@ -1,0 +1,78 @@
+package gui.menu;
+
+import java.awt.event.KeyEvent;
+import gui.Tree.AddCompany;
+import gui.Tree.AddParametar;
+import gui.Tree.AddProduct;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+
+import actionListener.AddBtnListener;
+
+public class MenuBar extends JMenuBar {
+	
+	private static final long serialVersionUID = 1L;
+
+public MenuBar(){
+	    
+	    JMenu file=new JMenu("File");
+	    JMenu miNew =new JMenu("New");
+	    JMenu search=new JMenu("Search");
+	    JMenu edit=new JMenu("Edit");
+		JMenu source=new JMenu("Source");
+		JMenu view =new JMenu("View");
+		JMenu win =new JMenu("Window");
+		JMenu help =new JMenu("Help");
+		JMenu Editor =new JMenu("Editor");
+		edit.addMouseListener(new EditBtnListener());
+		
+		add(file);
+		add(edit);
+		add(view);
+		add(source);
+		add(search);
+		add(win);
+		add(help);
+		
+		JMenuItem miCompany=new JMenuItem(new AddCompany("Company"));
+		JMenuItem miProduct=new JMenuItem(new AddProduct("Product"));
+		JMenuItem miParametar=new JMenuItem(new AddParametar("Parametar"));
+		miNew.add(miCompany);
+		miCompany.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,KeyEvent.SHIFT_MASK));
+		miCompany.addMouseListener(new AddBtnListener());
+		miNew.addSeparator();
+		miProduct.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,KeyEvent.SHIFT_MASK));
+		miProduct.addMouseListener(new AddBtnListener());
+		miNew.add(miProduct);
+		miNew.addSeparator();
+		miParametar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,KeyEvent.SHIFT_MASK));
+		miParametar.addMouseListener(new AddBtnListener());
+		miNew.add(miParametar);
+		
+		JMenuItem miOpen =new JMenuItem("Open");
+		JMenuItem miClose =new JMenuItem("Close");
+		JMenuItem miCloseAll =new JMenuItem("Close All");
+		JMenuItem newWind =new JMenuItem("New Window");
+		JMenuItem HideT =new JMenuItem("Hide Toolbar");
+		JMenuItem clone =new JMenuItem("Clone");
+				
+		file.add(miNew);
+		file.addSeparator();
+		file.add(miOpen);
+		file.addSeparator();
+		file.add(miClose);
+		file.add(miCloseAll);
+		
+	
+		win.add(newWind);
+		win.addSeparator();
+		win.add(Editor);
+		win.addSeparator();
+		win.add(HideT);
+		
+		Editor.add(clone);
+				
+}
+}

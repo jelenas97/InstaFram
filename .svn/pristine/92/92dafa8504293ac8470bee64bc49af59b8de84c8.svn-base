@@ -1,0 +1,54 @@
+package guiCheckBoxTree;
+
+import gui.MainWindow;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
+public class CheckBoxNode extends DefaultMutableTreeNode{
+	
+	
+	  /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8179144832292119783L;
+
+	  String text;
+
+	  boolean selected;
+	  
+	  DefaultMutableTreeNode sel = (DefaultMutableTreeNode) MainWindow
+				.getInstance().getTree().getLastSelectedPathComponent();
+	  
+
+	  public CheckBoxNode() {
+		 
+		  
+	  }
+	  
+	public CheckBoxNode(String text, boolean selected) {
+	    this.text = text;
+	    this.selected = selected;
+	  }
+
+	  public boolean isSelected() {
+	    return selected;
+	  }
+
+	  public void setSelected(boolean newValue) {
+	    selected = newValue;
+	  }
+
+	  public String getText() {
+	    return text;
+	  }
+
+	  public void setText(String newValue) {
+	    text = newValue;
+	  }
+
+	  public String toString() {
+	    return "Parametar";
+	  }
+	}
+
+

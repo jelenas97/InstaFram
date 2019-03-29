@@ -1,0 +1,76 @@
+package instaframModel;
+import java.awt.Image;
+import java.io.Serializable;
+
+public class ProductModel implements Serializable {
+	
+	private String Naziv_Proizvoda;
+	private String Verzija;
+	private Image Logo;
+
+
+	public ProductModel(String naziv) {
+		setNazivP(naziv);
+		setVerzija("Type product version..");
+		setPhoto(Logo);
+	}
+	
+	public  ProductModel(String Naziv_Proizvoda,String Verzija) {
+		this(Naziv_Proizvoda,Verzija,null);
+	} 
+	
+
+	public ProductModel(String Naziv_Proizvoda, String Verzija, Image Logo) {
+		setNazivP(Naziv_Proizvoda);
+		setVerzija(Verzija);
+		setPhoto(Logo);
+	}
+
+	
+
+	public String getNazivP() {
+		return Naziv_Proizvoda;
+	}
+
+	public void setNazivP(String Naziv_Proizvoda) {
+		if (Naziv_Proizvoda == null) {
+			throw new NullPointerException();
+		}
+		Naziv_Proizvoda = Naziv_Proizvoda.trim();
+		if (Naziv_Proizvoda.isEmpty()) {
+			throw new IllegalArgumentException("Ime proizvoda nije unesesno!");
+		}
+		this.Naziv_Proizvoda = Naziv_Proizvoda;
+	}
+
+	public String getVerzija() {
+		return Verzija;
+	}
+
+	public void setVerzija(String Verzija) {
+		if (Verzija == null) {
+			throw new NullPointerException();
+		}
+		Verzija = Verzija.trim();
+		if (Verzija.isEmpty()) {
+			throw new IllegalArgumentException("Verzija proizvoda nije unesena!");
+		}
+		this.Verzija = Verzija;
+	}
+
+	public Image getPhoto() {
+		return Logo;
+	}
+
+	public void setPhoto(Image Logo) {
+		this.Logo = Logo;
+	}
+
+	
+	@Override
+	public String toString() {
+		return this.Naziv_Proizvoda;
+	}
+
+
+}

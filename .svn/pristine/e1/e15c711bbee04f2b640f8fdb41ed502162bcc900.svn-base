@@ -1,0 +1,398 @@
+package gui;
+
+import gui.Toolbar.ToolBar;
+import gui.Tree.CellEditor;
+import gui.Tree.MySelectListener;
+import gui.menu.MenuBar;
+import guiCheckBoxTree.CheckBoxEditor;
+import guiCheckBoxTree.CheckBoxNode;
+import guiCheckBoxTree.CheckBoxRenderer;
+import guiCheckBoxTree.CheckBoxVector;
+import instaframModel.CompanyModel;
+import instaframModel.ConfiguratorModel;
+import instaframModel.ParametarModel;
+import instaframModel.ProductModel;
+import instaframView.CompanyView;
+import instaframView.ConfigurationView;
+import instaframView.ParametarView;
+import instaframView.ProductView;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import actionListener.ExitConf;
+import actionListener.ExitListener;
+
+public class MainWindow extends JFrame {
+
+	private static final long serialVersionUID = 1366462111697644313L;
+	public static final String APP_TITLE = "InstaFram";
+	private static MainWindow instance = null;
+	private JTree tree;
+	private DefaultTreeModel treeModel;
+	private ResourceBundle res;
+	private MenuBar menu;
+
+	private static JPanel rightPanel;
+
+	private MainWindow() {
+
+		Locale.setDefault(new Locale("sr","RS"));
+
+		res = ResourceBundle.getBundle("messageRes.MesRes", Locale.getDefault());
+
+	}
+	
+	public void initGUI() {
+		
+	
+		setTitle(APP_TITLE);
+		setSize(1000, 700);
+		ImageIcon image = new ImageIcon("images/Logo.png");
+		this.setIconImage(image.getImage());
+		
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+	    menu = new MenuBar();
+		menu.setPreferredSize(new Dimension(500, 20));
+		setJMenuBar(menu);
+
+		ToolBar tb = new ToolBar();
+		tb.setPreferredSize(new Dimension(500, 35));
+		add(tb, BorderLayout.NORTH);
+
+		JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pnlStatus.setBackground(Color.WHITE);
+		pnlStatus.setPreferredSize(new Dimension(100, 40));
+		pnlStatus.setBorder(new MatteBorder(1, 1, 1, 1, Color.GRAY));
+
+		JLabel status = new JLabel("Status bar :");
+		status.setPreferredSize(new Dimension(100, 27));
+		pnlStatus.add(status);
+		add(pnlStatus, BorderLayout.SOUTH);
+
+		JPanel panel = new JPanel();
+		panel.setBorder(new EmptyBorder(450, 650, 20, 20));
+		panel.setBorder(BorderFactory.createEtchedBorder());
+		panel.setLayout(new BorderLayout());
+
+		JPanel leftPanel = new JPanel();
+		leftPanel.setBackground(Color.WHITE);
+		leftPanel.setPreferredSize(new Dimension(300, 500));
+
+		rightPanel = new JPanel();
+		rightPanel.setBackground(Color.WHITE);
+
+		initTree();
+
+		JScrollPane scroll = new JScrollPane(tree,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scroll.setPreferredSize(new Dimension(300, 500));
+		scroll.setBackground(Color.WHITE);
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scroll, rightPanel);
+		panel.add(splitPane);
+		add(panel, BorderLayout.CENTER);
+		
+		addWindowListener(new ExitListener());
+		
+		
+		
+		
+	}
+	
+	public void showConfigurator() {
+		
+		
+		JFrame frame = new JFrame("Configurator");
+		frame.setSize(new Dimension(900,590));
+		frame.setLocationRelativeTo(null);
+		 ArrayList<DefaultMutableTreeNode> lista = new ArrayList<DefaultMutableTreeNode>();
+		  
+		    
+		    DefaultMutableTreeNode sel = (DefaultMutableTreeNode) MainWindow
+					.getInstance().getTree().getLastSelectedPathComponent();
+		    
+			
+		   for(int i = 0 ; i < sel.getLeafCount();i++) {
+		    	
+			  lista.add(sel.getNextNode());
+			  
+			  if (!sel.getNextNode().isLeaf()){
+				  lista.get(i).getAllowsChildren();
+				  lista.get(i).add(lista.get(i).getNextNode());
+			  
+			  }
+		    	
+		    }
+		
+		    
+	       Vector<DefaultMutableTreeNode> product = new CheckBoxVector(MainWindow.getInstance().getResourceBundle().getString("product"));
+	       
+	       for(int i = 0;i<lista.size();i++) {
+	    	   
+	    	   product.add(i,new CheckBoxNode("Parametar",true));
+	   	      	   
+	       }
+		   
+	       
+		    Object rootNodes[] = { product };
+		  	   
+		    JTree tree = new JTree(rootNodes);
+	 
+		    CheckBoxRenderer renderer = new CheckBoxRenderer();
+		    tree.setCellRenderer(renderer);
+
+		    tree.setCellEditor(new CheckBoxEditor(tree));
+		    tree.setEditable(true);
+
+		    
+		    JScrollPane scrollPane = new JScrollPane(tree,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		    scrollPane.setPreferredSize(new Dimension(200,200));
+		    
+		    JPanel pan = new JPanel();
+		    pan.setPreferredSize(new Dimension(500,400));
+		    pan.setBackground(Color.white);
+		    
+		    ConfigurationView cv = new ConfigurationView();
+		    ConfiguratorModel cm = new ConfiguratorModel();
+		    
+		    cv.setConf(cm);
+		    pan.add(cv);
+		    
+		    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,scrollPane,pan );
+		    
+		    frame.getContentPane().add(splitPane, BorderLayout.CENTER);
+		   
+		    addWindowListener(new ExitConf());
+		    
+		    frame.setVisible(true);
+		
+	   
+	    
+	  }
+	
+	public void showEditCompanyView(CompanyModel comp) {
+		CompanyView kv = new CompanyView();		
+		kv.setKompanija(comp);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,50));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+
+	
+	public void showEditProductView(ProductModel pro) {
+		ProductView kv = new ProductView();		
+		kv.setProizvod(pro);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,25));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showEditParametarView(ParametarModel par) {
+		ParametarView pr = new ParametarView();		
+		pr.setParametar(par);
+		rightPanel.removeAll();
+		JPanel title = new JPanel();
+		JLabel lbl = new JLabel("Now you can edit");
+		title.add(lbl, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		title.setPreferredSize(new Dimension(500,50));
+		title.setBackground(Color.white);
+		rightPanel.add(title);
+		rightPanel.add(pr);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showCompanyView(CompanyModel comp) {
+		CompanyView kv = new CompanyView();
+		kv.setKompanija(comp);
+		rightPanel.removeAll();
+		rightPanel.add(kv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void showProductView(ProductModel pro) {
+		ProductView pv = new ProductView();
+		pv.setProizvod(pro);
+		rightPanel.removeAll();
+		rightPanel.add(pv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+	public void hideCompanyView(CompanyModel comp) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+	public void hideProductView(ProductModel prod) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+	public void hideParametarView(ParametarModel param) {
+		JPanel pBlanco = new JPanel();
+		pBlanco.setPreferredSize(new Dimension(200,200));
+		pBlanco.setBackground(Color.white);
+		rightPanel.removeAll();
+		rightPanel.add(pBlanco);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	
+	}
+	
+
+	public void showParametarView(ParametarModel par) {
+		ParametarView pv = new ParametarView();
+		pv.setParametar(par);
+		rightPanel.removeAll();
+		rightPanel.add(pv);
+		rightPanel.revalidate();
+		rightPanel.repaint();
+	}
+	
+public void changeLanguage(){
+		
+		res =
+            ResourceBundle.getBundle( "messageRes.MesRes", Locale.getDefault() );
+	    setTitle(res.getString("Title"));
+		menu.initComponents();
+		
+	}
+	
+	private void initTree() {
+		treeModel = new DefaultTreeModel(new DefaultMutableTreeNode(MainWindow.getInstance().getResourceBundle().getString("treeModel")));
+		treeModel.setAsksAllowsChildren(true);
+		
+		//treeModel.setText(MainWindow.getInstance().getResourceBundle().getString("treeModel"));
+
+		tree = new JTree(treeModel) {
+
+			private static final long serialVersionUID = 2789999619139248302L;
+
+			@Override
+			public boolean isPathEditable(TreePath path) {
+
+				if (path != null) {
+					DefaultMutableTreeNode tn = (DefaultMutableTreeNode) path
+							.getLastPathComponent();
+					if (!tn.isRoot()) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+				return false;
+			}
+
+		};
+		tree.setEditable(true);
+		tree.setBackground(Color.white);
+		tree.setCellEditor(new CellEditor(tree, null));
+		tree.addTreeSelectionListener(new MySelectListener());
+		tree.getSelectionModel().setSelectionMode(
+				TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		KeyStroke ks = KeyStroke.getKeyStroke("F2");
+		InputMap im = tree
+				.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+		im.put(ks, "edit_tree_cell");
+		ActionMap am = tree.getActionMap();
+		am.put("edit_tree_cell", new AbstractAction() {
+
+			private static final long serialVersionUID = 1309752715414833276L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				tree.startEditingAtPath(tree.getSelectionPath());
+			}
+		});
+	}
+
+	
+	public ResourceBundle getResourceBundle() {
+		return res;
+	}
+	
+	public static MainWindow getInstance() {
+		if (instance==null) {
+		     instance = new MainWindow();
+		     instance.initGUI();
+		}
+		
+		return instance;
+	}
+
+	public JTree getTree() {
+		return tree;
+	}
+
+	public DefaultTreeModel getModel() {
+		return treeModel;
+	}
+
+}

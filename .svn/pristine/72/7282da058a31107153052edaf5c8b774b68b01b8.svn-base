@@ -1,0 +1,57 @@
+package instaframModel;
+
+public class ParametarModel {
+	
+	private String naziv;
+	private String vrednost;
+	
+	
+	 public ParametarModel(String naziv) {
+		 setNaziv(naziv);
+		 setVrednost("Type parametar value");
+	}
+	
+	 public ParametarModel(String naziv,String vrednost) {
+		 setNaziv(naziv);
+		 setVrednost(vrednost);
+	}
+	
+
+	public String getNaziv() {
+		return naziv;
+	}
+
+	public void setNaziv(String naziv) {
+		if (naziv == null) {
+			throw new NullPointerException();
+		}
+		naziv = naziv.trim();
+		if (naziv.isEmpty()) {
+			throw new IllegalArgumentException("Name is empty!");
+		}
+		this.naziv = naziv;
+	}
+
+	public String getVrednost() {
+		return vrednost;
+	}
+
+	public void setVrednost(String vrednost) {
+		if (vrednost == null) {
+			throw new NullPointerException();
+		}
+		vrednost = vrednost.trim();
+		if (vrednost.isEmpty()) {
+			throw new IllegalArgumentException("Value is empty!");
+		}
+		this.vrednost = vrednost;
+	}
+
+	@Override
+	public String toString() {
+		return this.naziv;
+	}
+
+	
+
+}

@@ -1,0 +1,63 @@
+package gui.Tree;
+
+import gui.MainWindow;
+import instaframModel.ParametarModel;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+public class AddParametar extends AbstractAction {
+	private static final long serialVersionUID = 1L;
+	
+	public AddParametar() {}
+
+	public AddParametar(String name) {
+		super(name);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		DefaultMutableTreeNode sel = (DefaultMutableTreeNode) MainWindow
+				.getInstance().getTree().getLastSelectedPathComponent();
+
+		if (sel.getLevel()==2) {
+			if (sel.getAllowsChildren()) {
+				DefaultMutableTreeNode nNode = new DefaultMutableTreeNode(new ParametarModel("Parametar"));
+
+				MainWindow.getInstance().getModel()
+						.insertNodeInto(nNode, sel, sel.getChildCount());
+
+				if (nNode.getPath().length > 4) {
+					nNode.setAllowsChildren(false);
+				}
+
+				MainWindow.getInstance().getTree()
+						.setSelectionPath(new TreePath(nNode.getPath()));
+				MainWindow.getInstance().getTree()
+						.scrollPathToVisible(new TreePath(nNode.getPath()));
+			}
+		}
+		
+		else if (sel.getLevel()>2) {
+			if (sel.getAllowsChildren()) {
+				DefaultMutableTreeNode nNode = new DefaultMutableTreeNode(new ParametarModel("Subparametar"));
+
+				MainWindow.getInstance().getModel()
+						.insertNodeInto(nNode, sel, sel.getChildCount());
+
+				if (nNode.getPath().length > 10) {
+					nNode.setAllowsChildren(false);
+				}
+
+				MainWindow.getInstance().getTree()
+						.setSelectionPath(new TreePath(nNode.getPath()));
+				MainWindow.getInstance().getTree()
+						.scrollPathToVisible(new TreePath(nNode.getPath()));
+			}
+		} 
+	}
+	
+	
+
+}

@@ -1,0 +1,73 @@
+package gui.Tree;
+
+import gui.MainWindow;
+import instaframModel.ProductModel;
+
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import actionListener.NodeListener;
+
+public class AddProduct extends AbstractAction{
+	
+
+	private static final long serialVersionUID = 1L;
+
+	
+	public AddProduct() {
+	}
+
+	public AddProduct(String name) {
+		super(name);
+	}
+
+	public AddProduct(String name, Icon icon) {
+		super(name, icon);
+	
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		
+		DefaultMutableTreeNode sel = (DefaultMutableTreeNode) MainWindow
+				.getInstance().getTree().getLastSelectedPathComponent();
+		
+       if (sel == null) {
+			
+			JOptionPane.showMessageDialog(null, "You must select WorkSpace first");
+			
+		}
+		
+       else if (sel.getLevel()==1)  {
+			if (sel.getAllowsChildren()) {
+				DefaultMutableTreeNode nNode = new DefaultMutableTreeNode(new ProductModel("Product"));
+
+               
+				 
+				MainWindow.getInstance().getModel()
+						.insertNodeInto(nNode, sel, sel.getChildCount());
+
+				if (nNode.getPath().length > 3) {
+					nNode.setAllowsChildren(false);
+				}
+
+				MainWindow.getInstance().getTree().addMouseListener(new NodeListener());
+				MainWindow.getInstance().getTree()
+						.setSelectionPath(new TreePath(nNode.getPath()));
+				MainWindow.getInstance().getTree()
+						.scrollPathToVisible(new TreePath(nNode.getPath()));
+			}
+			
+		}
+       
+    	   
+	}
+
+}
+

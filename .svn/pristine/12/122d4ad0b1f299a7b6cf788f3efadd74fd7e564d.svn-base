@@ -1,0 +1,231 @@
+package gui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
+
+import org.apache.commons.io.IOUtils;
+
+import actionListener.Action;
+import actionListener.NextBtnListener;
+import actionListener.SaveListener;
+
+public class MainWindow2 extends JFrame{
+	
+	private JTextField tx;
+	
+	private File selFile;
+	
+	private static MainWindow2 instance = null;	
+	
+	
+	public void showFirstWizard() {
+		JFrame f = new JFrame("Welcome Wizard");
+		f.setSize(new Dimension(700, 400));
+		f.setLocationRelativeTo(null);
+		JButton btnCancel = new JButton("Cancel");
+		JButton btnNext = new JButton(("Next"));
+		btnNext.addMouseListener(new NextBtnListener());
+		JPanel pan = new JPanel();
+		JPanel panN = new JPanel();
+		JPanel panC = new JPanel();
+		panC.setBackground(Color.white);
+		panN.setPreferredSize(new Dimension(500,50));
+		panN.setBackground(Color.white);
+		pan.setBackground(Color.WHITE);
+		
+		JLabel lbl = new JLabel();
+		
+		lbl.setPreferredSize(new Dimension(500, 50));
+		lbl.setText(MainSecond.ucitanTekst[0]);
+		panN.add(lbl);
+			
+		btnCancel.setPreferredSize(new Dimension(100,25));
+		btnNext.setPreferredSize(new Dimension(100,25));
+		
+		Box.createHorizontalGlue();
+		pan.add(btnNext);
+		pan.add(btnCancel);
+		
+	    f.add(pan,BorderLayout.SOUTH);
+	    f.add(panN,BorderLayout.NORTH);
+	    f.add(panC,BorderLayout.CENTER);
+	    f.setVisible(true);
+		
+	}
+	
+	
+public void showSecondWizard() {
+		
+		JFrame f = new JFrame("Licence Wizard");
+		f.setSize(new Dimension(600, 400));
+		f.setLocationRelativeTo(null);
+		JButton btnCancel = new JButton("Cancel");
+		JButton btnNext = new JButton("Next");
+		
+		btnNext.addMouseListener(new SaveListener());
+		JCheckBox acc = new JCheckBox("Accept");
+		JPanel pan = new JPanel();
+		JPanel panC = new JPanel();
+		panC.setBackground(Color.white);
+		acc.setSelected(true);
+		JLabel lbl = new JLabel();
+		lbl.setBounds(0, 0, 0, 0);
+		
+		
+		
+		lbl.setText(MainSecond.ucitanTekst[1]);
+		
+		lbl.setPreferredSize(new Dimension(500, 550));
+		panC.add(lbl);
+			
+		
+		btnCancel.setPreferredSize(new Dimension(100,25));
+		btnNext.setPreferredSize(new Dimension(100,25));
+	
+		pan.add(acc);
+		
+		Box.createHorizontalGlue();
+		pan.add(btnNext);
+		Box.createHorizontalBox();
+		pan.add(btnCancel);
+		
+		pan.setBackground(Color.white);
+	    f.add(pan,BorderLayout.SOUTH);
+	    f.add(panC,BorderLayout.CENTER);
+	    f.setVisible(true);
+		
+		
+	}
+	
+public void showThirdWizard() {
+	
+	JFrame f = new JFrame("Save Wizard");
+	f.setSize(new Dimension(700, 200));
+	f.setLocationRelativeTo(null);
+	
+	JLabel lab = new JLabel("Choose save folder");
+	tx = new JTextField(40);
+	JButton browse = new JButton("...");
+	JButton save = new JButton("Save");
+	
+	save.addActionListener(new Action());
+	
+	JPanel pan = new JPanel();
+	pan.setBackground(Color.white);
+	
+	browse.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			uploadSaveFolder();
+			
+		}
+	});
+	
+	tx.setVisible(true);
+	pan.add(lab);
+	pan.add(tx);
+	pan.add(browse);
+	pan.add(save);
+	f.add(pan);
+   
+    f.setVisible(true);
+	
+	
+}
+
+	public static MainWindow2 getInstance2() {
+		if (instance==null) {
+		     instance = new MainWindow2();
+		     
+		}
+		
+		return instance;
+	}
+	
+	
+	private void uploadSaveFolder() {
+		// TODO Auto-generated method stub
+		
+		JFileChooser fc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+		fc.setDialogTitle("Open");
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+		
+		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
+			
+			 selFile = fc.getSelectedFile();
+			 tx.setText(selFile.getAbsolutePath());
+		  
+	     	}
+		
+		
+		
+	}
+	
+	public File getChoosePath() {
+		return selFile;
+		
+	}
+	
+	public static void unzip(File outputDir) throws IOException {
+		
+	    String s = MainSecond.ucitanTekst[3];
+	   
+		ZipFile zipFile = new ZipFile(s);
+		try {
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				File entryDestination = new File(outputDir, entry.getName());
+				if (entry.isDirectory()) {
+					entryDestination.mkdirs();
+				} else {
+					entryDestination.getParentFile().mkdirs();
+					InputStream in = zipFile.getInputStream(entry);
+					OutputStream out = new FileOutputStream(entryDestination);
+					IOUtils.copy(in, out);
+					IOUtils.closeQuietly(in);
+					out.close();
+				}
+			}
+		} finally {
+			zipFile.close();
+		}
+		
+		JOptionPane.showMessageDialog(null, "Installation successed");
+	}
+
+}
+
+
